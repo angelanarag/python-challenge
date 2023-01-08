@@ -22,80 +22,76 @@ budget_output = os.path.join("analysis", "budget_output.txt")
 
 # Set variables
 
-total_months = 0
-total_pl = 0
+months = []
 pl = []
-prev_pl = 0
-month_of_change = []
-pl_change = 0
+pl_change = []
+pl_average = 0
 greatest_decrease = ["", 9999999]
 greatest_increase = ["", 0]
-pl_change_list = []
-pl_average = 0
+month_of_change = []
+
+
 
 # Open the csv file
 with open(budget_file) as csvfile:
 
     # Specify delimiter and variable that holds contents of the csv file
     budgetreader = csv.reader(csvfile, delimiter=',')
-    # budgetreader = csv.DictReader(csvfile)
 
     # Read the header row first and skip to next so you don't include it in the count
-    csv_header = next(budgetreader)
+    skip_header = next(budgetreader)
 
-    # Read each row of data after the header
-    for row in budgetreader:
+    # Go through the rows in the budget data file
+    for row in budgetreader: 
+
+        # Append the months and the P&L to their corresponding lists
+        months.append(row[0])
+        pl.append(int(row[1]))
     
-        # Count the months
-        total_months += 1
+    # Calculate Total Months and Total P&L
+    count_months = len(months)
+    sum_pl = sum(pl)
+
+    # Using the sum_pl list, go through each month's P&L to get the monthly change
+    # Subtract 1 from the total count of the months since Range function starts from 0
+    for i in range(count_months -1):
         
-        # Calculate the total profit loss
-        total_pl = total_pl + int(row[1])
-        
-        # Calculate average change
-        # Take the current month's p&l and subtract the previous month's p&l for p&l change 
-        pl_change = int(row[1]) - prev_pl
-        prev_pl = int(row[1])
-        # Save each p&l change from month to month in a list 
-        pl_change_list = pl_change_list + [pl_change]
-        month_of_change = [month_of_change] + [row[0]]
+        # Take the difference between current month vs. previous month and append to P&L change list
+        # i + 1 is the current month while i will be the previous month
+        pl_change.append(pl[i+1]-pl[i])
+    
+    # Calculate the Average Change
+    pl_average = round(sum(pl_change)/len(pl_change),2)
 
-        # Find the greatest increase in p&l change and the corresponding month
-        if pl_change > greatest_increase[1]:
-            # Places the greatest increase p&l changes in the second position
-            greatest_increase[1] = pl_change
-            # Places the corresponding month in the first position
-            greatest_increase[0] = row[0]
+    # Calculate the max and min of P&L change and corresponding month
+    # Use index to match the P&L change to the month 
+    # Add 1 at the end since month associated with change is the next month
+    greatest_increase[1] = max(pl_change) 
+    greatest_increase_month = pl_change.index(max(pl_change)) + 1
+    greatest_increase[0] = (months[greatest_increase_month])
+    greatest_decrease[1] = min(pl_change)
+    greatest_decrease_month = pl_change.index(min(pl_change)) + 1 
+    greatest_decrease[0] = (months[greatest_decrease_month])
 
-        # Find the greatest decrease in p&l change and the corresponding month
-        if pl_change < greatest_decrease[1]:
-            greatest_decrease[1] = pl_change
-            greatest_decrease[0] = row[0]
-        
-        # Once script has gone through all the rows, you will have a list of all p&l changes
-        # As well as the greatest increase and greatest decrease in p&l change 
-
-    # Calculate average p&l by summing all the p&l changes and dividing by the count
-    pl_average = round(sum(pl_change_list)/len(pl_change_list), 2)
-
-# print results to the terminal
-print("Financial Analysis")
-print("------------------------------------------------------")
-print(f'Total Months: {total_months}')
-print(f'Total: ${total_pl}')
-print(f'Average Change: ${pl_average}')
-print(f'Greatest Increase in Profits: {greatest_increase[0]}, (${greatest_increase[1]})')
-print(f'Greatest Decrease in Profits: {greatest_decrease[0]}, (${greatest_decrease[1]})')
-        
-
-
+    # print results to the terminal
+    print("Financial Analysis")
+    print("------------------------------------------------------")
+    print(f'Total Months: {count_months}')
+    print(f'Total: ${sum_pl}')        
+    print(f'Average Change: ${pl_average}')
+    print(f'Greatest Increase in Profits: {greatest_increase[0]}, (${greatest_increase[1]})')
+    print(f'Greatest Decrease in Profits: {greatest_decrease[0]}, (${greatest_decrease[1]})')
+      
 # create text file with the printed results
 with open(budget_output, 'w') as file:
     file.write("Financial Analysis\n")
     file.write("--------------------------------------------------\n")
-    file.write(f'Total Months: {total_months}\n')
-    file.write(f'Total: ${total_pl}\n')
+    file.write(f'Total Months: {count_months}\n')
+    file.write(f'Total: ${sum_pl}\n')
     file.write(f'Average Change: ${pl_average}\n')
     file.write(f'Greatest Increase in Profits: {greatest_increase[0]}, (${greatest_increase[1]})\n')
     file.write(f'Greatest Decrease in Profits: {greatest_decrease[0]}, (${greatest_decrease[1]})\n')
+    file.write("--------------------------------------------------\n")
+
+
     
