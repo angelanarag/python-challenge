@@ -21,7 +21,6 @@ budget_file = os.path.join("Resources", "budget_data.csv")
 budget_output = os.path.join("analysis", "budget_output.txt")
 
 # Set variables
-
 months = []
 pl = []
 pl_change = []
@@ -29,8 +28,6 @@ pl_average = 0
 greatest_decrease = ["", 9999999]
 greatest_increase = ["", 0]
 month_of_change = []
-
-
 
 # Open the csv file
 with open(budget_file) as csvfile:
@@ -56,22 +53,24 @@ with open(budget_file) as csvfile:
     # Subtract 1 from the total count of the months since Range function starts from 0
     for i in range(count_months -1):
         
-        # Take the difference between current month vs. previous month and append to P&L change list
+        # Take the difference between current month vs. previous month and append to monthly P&L change list
         # i + 1 is the current month while i will be the previous month
         pl_change.append(pl[i+1]-pl[i])
+        # Append the corresponding month of change
+        month_of_change.append(months[i+1])
     
     # Calculate the Average Change
     pl_average = round(sum(pl_change)/len(pl_change),2)
 
-    # Calculate the max and min of P&L change and corresponding month
-    # Use index to match the P&L change to the month 
-    # Add 1 at the end since month associated with change is the next month
+    # Calculate the max and min pf P&L change and corresponding month
     greatest_increase[1] = max(pl_change) 
-    greatest_increase_month = pl_change.index(max(pl_change)) + 1
-    greatest_increase[0] = (months[greatest_increase_month])
     greatest_decrease[1] = min(pl_change)
-    greatest_decrease_month = pl_change.index(min(pl_change)) + 1 
-    greatest_decrease[0] = (months[greatest_decrease_month])
+    # Use index to match the P&L change to the month of change
+    greatest_increase_month = pl_change.index(max(pl_change))
+    greatest_increase[0] = (month_of_change[greatest_increase_month])
+    greatest_decrease_month = pl_change.index(min(pl_change)) 
+    greatest_decrease[0] = (month_of_change[greatest_decrease_month])
+
 
     # print results to the terminal
     print("Financial Analysis")
@@ -80,8 +79,8 @@ with open(budget_file) as csvfile:
     print(f'Total: ${sum_pl}')        
     print(f'Average Change: ${pl_average}')
     print(f'Greatest Increase in Profits: {greatest_increase[0]}, (${greatest_increase[1]})')
-    print(f'Greatest Decrease in Profits: {greatest_decrease[0]}, (${greatest_decrease[1]})')
-      
+    print(f'Greatest Decrease in Profits: {greatest_decrease[0]}, (${greatest_decrease[1]})')      
+
 # create text file with the printed results
 with open(budget_output, 'w') as file:
     file.write("Financial Analysis\n")
